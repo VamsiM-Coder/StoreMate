@@ -38,7 +38,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'user',
             'created_at',
             'status',
-            
+            'items',
         )
              
         
