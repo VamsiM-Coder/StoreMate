@@ -30,7 +30,10 @@ class OrderItemSerializer(serializers.ModelSerializer):
         )    
         
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, read_only=True)
+    '''
+    It is Nested Serializer, it is useful for nested lists if we doesn't need all the data then coment this...
+    '''
+    # items = OrderItemSerializer(many=True, read_only=True)
     class Meta:
         model = Order
         fields = (
