@@ -23,7 +23,8 @@ class ProductSerializer(serializers.ModelSerializer):
     
 class OrderItemSerializer(serializers.ModelSerializer):
     
-    # product = ProductSerializer() this line give all info of product but i want customized data i go for below
+    # product = ProductSerializer()
+    # This line gives nested serializer info of product but i want customized data i go for below
     product_name = serializers.CharField(source='product.name')
     product_price = serializers.DecimalField(source='product.price',max_digits=10,decimal_places=2)
     
