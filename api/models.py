@@ -12,7 +12,7 @@ class Product(models.Model):
     stock = models.PositiveIntegerField()
     image = models.ImageField(upload_to='products/%Y/%m/%d/', blank = True, null = True)
     
-# @property is used like method that acts as attr - we can access this it obj.name even through it's method.
+#@property is used like method that acts as attr - we can access this it obj.name even through it's method.
     @property
     def in_stock(self):
         return self.stock > 0

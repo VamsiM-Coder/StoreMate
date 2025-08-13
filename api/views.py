@@ -30,6 +30,7 @@ def product_detail(request,pk):
     serialized = ProductSerializer(product)
     return Response(serialized.data)
 
+#Get all orders
 @api_view(['GET'])
 def order_list(request):
     orders = Order.objects.all()
