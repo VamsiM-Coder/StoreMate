@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase
 
+#These functions are functional testing.... 
 class DiffValueAPITestCase(APITestCase):
     def get_dict_diff_based_on_original_value(self, current_value, original_value, key,
             value, diff_dict, original_dict):
