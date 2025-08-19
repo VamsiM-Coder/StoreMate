@@ -1,7 +1,7 @@
 """CO-Lending Report."""
 
 import pandas as pd
-import json
+
 from api.models import ServiceDetail
 
 
@@ -63,7 +63,8 @@ def main(temp_dir, **kwargs):
     ]
 
     loans = ApprovedLoan.objects.filter(
-        approval_status__in=LoanApprovalStatus.disbursed_status_list
+        #approval_status__in=LoanApprovalStatus.disbursed_status_list,
+        product__name__in = ['Co-Lending 3W','RTS CNI Co-lending','Co-Lending 2W','Co Lending Master']
     ).values_list(
         'profile__full_name', #0
         'loan_request__created_at', #1
@@ -84,16 +85,7 @@ def main(temp_dir, **kwargs):
     data = []
     for loan in loans:
         post_disbursal_detail = post_disbursal_details.get(loan[8], {})
-        orig_data = loan[9]
-        if isinstance(orig_data, str):
-            try:
-                orig_data = json.loads(orig_data)
-            except json.JSONDecodeError:
-                orig_data = {}
-        elif not isinstance(orig_data, dict):
-            orig_data = {}
-
-        co_lending_details = orig_data.get('co_lending_details', {})
+        co_lending_details = loan[9].get('co_lending_details', {})
 
         data.append([
             loan[0],  # Customer Name
@@ -115,20 +107,21 @@ def main(temp_dir, **kwargs):
             co_lending_details.get('emi_day_of_month'),  # Emi Day of Month
             co_lending_details.get('insurance_premium_amount'),  # Insuance Premium Amount
             co_lending_details.get('loan_details_repayment_frequency'),  # Loan Details Repayment Frequency
-            post_disbursal_detail.get('umrn'),  # UMRN
-            post_disbursal_detail.get('vehicle_idv'),  # Vehicle Idv
+            loan[9].get('nach_details',{}).get('umrn'), # UMRN
+            loan[9].get('vehicle_details',{}).get('vehicle_idv',''),  # Vehicle Idv
             post_disbursal_detail.get('life_insurance'),  # Life Insurance
             post_disbursal_detail.get('health_insurance'),  # Health Insurance
             post_disbursal_detail.get('addon_insurance_price'),  # Addon Insurance Price
             post_disbursal_detail.get('is_insurance_applicable'),  # Is Insurance Applicable
             post_disbursal_detail.get('vehicle_registration_number'),  # Vehicle Registration Number
-            post_disbursal_detail.get('vehicle_insurance_validity_date'),  # Vehicle Insurance Validity Date
+            loan[9].get('vehicle_details',{}).get('vehicle_insurance_validity_date',''),  # Vehicle Insurance Validity Date
             post_disbursal_detail.get('rc_number'),  # Rc Number
-            post_disbursal_detail.get('chassis_number'),  # Chassis Number
-            post_disbursal_detail.get('vehicle_battery_type'),  # Vehicle Battery Type
-            post_disbursal_detail.get('vehicle_on_road_price'), # Vehicle On Road Price
-            post_disbursal_detail.get('vehicle_insurance_provider'),  # Vehicle Insuurance Provider
-            post_disbursal_detail.get('vehicle_insurance_policy_number'),  # Vehicle Insurance Policy Number
+            loan[9].get('vehicle_details',{}).get('chassis_number',''), # Chassis Number
+            loan[9].get('vehicle_details',{}).get('vehicle_battery_type',''),  # Vehicle Battery Typ
+            loan[9].get('vehicle_details',{}).get('vehicle_on_road_price',''),# Vehicle On Road Price
+            loan[9].get('vehicle_details',{}).get('vehicle_insurance_provider',''),# Vehicle Insuurance Provider
+            loan[9].get('vehicle_details',{}).get('vehicle_insurance_policy_number',''),
+            # Vehicle Insurance Policy Number
         ])
 
     file_name = f"{temp_dir}/co-lending-report.xlsx"
