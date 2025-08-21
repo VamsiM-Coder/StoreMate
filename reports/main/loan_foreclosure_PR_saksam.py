@@ -1,4 +1,5 @@
 def reverse_subvention_accrual(self):
+    
         """Reverse subvention accrual."""
         if self.no_subvention_refund:
             return
