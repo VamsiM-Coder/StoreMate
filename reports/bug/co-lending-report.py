@@ -3,7 +3,7 @@
 import pandas as pd
 
 from api.models import ServiceDetail
-
+from api.models import ServiceDetail
 
 from loan.choices import LoanApprovalStatus
 from loan.models import ApprovedLoan
@@ -63,7 +63,7 @@ def main(temp_dir, **kwargs):
     ]
 
     loans = ApprovedLoan.objects.filter(
-        #approval_status__in=LoanApprovalStatus.disbursed_status_list,
+        approval_status__in=LoanApprovalStatus.disbursed_status_list,
         product__name__in = ['Co-Lending 3W','RTS CNI Co-lending','Co-Lending 2W','Co Lending Master']
     ).values_list(
         'profile__full_name', #0
@@ -97,6 +97,7 @@ def main(temp_dir, **kwargs):
             loan[4],  # Sanctioned Loan Amount
             loan[5],  # Disb Amount
             loan[6],  # Disbursement Date
+            loan[9].get('vehicle_details',{}).get('dealer_state','')
             '',  # Bre Approved Installation Address State
             loan[9].get('dealer_code'), # Dealer Code
             loan[7],  # Disbursal UTR
@@ -112,7 +113,7 @@ def main(temp_dir, **kwargs):
             post_disbursal_detail.get('life_insurance'),  # Life Insurance
             post_disbursal_detail.get('health_insurance'),  # Health Insurance
             post_disbursal_detail.get('addon_insurance_price'),  # Addon Insurance Price
-            post_disbursal_detail.get('is_insurance_applicable'),  # Is Insurance Applicable
+            loan[9].get('is_insurance_applicable'),  # Is Insurance Applicable
             post_disbursal_detail.get('vehicle_registration_number'),  # Vehicle Registration Number
             loan[9].get('vehicle_details',{}).get('vehicle_insurance_validity_date',''),  # Vehicle Insurance Validity Date
             post_disbursal_detail.get('rc_number'),  # Rc Number
