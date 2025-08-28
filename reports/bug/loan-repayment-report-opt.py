@@ -4,7 +4,7 @@ from accounting.choices import RepaymentChargeType
 from accounting.models import Allocation
 from base.utils.date import parse_date
 from loan.choices import LoanRepaymentStatus
-from loan.models import LoanRepayment, ApprovedLoan
+from loan.models import LoanRepayment
 from nach.models import NachMandate
 
 
@@ -20,25 +20,22 @@ def get_dpd(repayment, collected, as_of_date):
 
 
 def main(temp_dir, **kwargs):
-    """Execute optimized repayment schedule report."""
+    """Execute report."""
     as_of_date = parse_date(kwargs.get('as_of_date'))
 
-    # ✅ Compact filter building
-    filter_kwargs = {
+    filter = {
         'loan__disbursement_date__gte': parse_date(kwargs['from_date']) if kwargs.get('from_date') else None,
         'loan__disbursement_date__lte': parse_date(kwargs['to_date']) if kwargs.get('to_date') else None,
         'due_date__gte': parse_date(kwargs['due_date_from']) if kwargs.get('due_date_from') else None,
         'due_date__lte': parse_date(kwargs['due_date_to']) if kwargs.get('due_date_to') else None,
         'loan__product__name__in': kwargs.get('product_name') if kwargs.get('product_name') else None,
     }
-    # remove None values
-    filter_kwargs = {k: v for k, v in filter_kwargs.items() if v is not None}
+    filter = {k: v for k, v in filter.items() if v is not None}
 
-    # ✅ Fetch repayments in one go
     repayments = list(
-        LoanRepayment.objects.filter(**filter_kwargs)
+        LoanRepayment.objects.filter(**filter)
         .values(
-            'id',
+            'uuid',
             'due_date',
             'repayment_amount',
             'principal_amount',
@@ -59,10 +56,8 @@ def main(temp_dir, **kwargs):
         .order_by('loan__loan_agreement_id', 'due_date')
     )
 
-    # ✅ Collect LANs
     lans = {x['loan__loan_agreement_id'] for x in repayments}
 
-    # ✅ Fetch allocations grouped by repayment_id
     allocations = Allocation.objects.filter(
         approved_loan__loan_agreement_id__in=lans,
         charge_type=RepaymentChargeType.PRINCIPAL,
@@ -73,17 +68,14 @@ def main(temp_dir, **kwargs):
     for alloc in allocations:
         remapped_allocations[alloc['loan_repayment_id']] += alloc['allocated_amount']
 
-    # ✅ Fetch mandates in one go
     mandates = (
         NachMandate.objects.filter(approved_loan__loan_agreement_id__in=lans)
         .values('approved_loan__loan_agreement_id', 'umrn')
     )
     latest_mandates = {}
     for m in mandates:
-        # Keep last umrn per LAN
         latest_mandates[m['approved_loan__loan_agreement_id']] = m['umrn']
 
-    # ✅ Prepare Excel file
     headers = [
         'Product', 'Partner Name', 'LAN', 'Partner Loan Id', 'Full Name', 'Loan Amount',
         'Disbursal Date', 'EMI Date', 'EMI Amount', 'Principal Amount', 'Interest Amount',
@@ -96,9 +88,8 @@ def main(temp_dir, **kwargs):
     ws = wb.active
     ws.append(headers)
 
-    # ✅ Stream rows directly
     for repayment in repayments:
-        repayment_id = repayment['id']
+        repayment_id = repayment['uuid']
         lan = repayment['loan__loan_agreement_id']
 
         collected = remapped_allocations.get(repayment_id, 0)

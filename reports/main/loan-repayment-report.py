@@ -3,11 +3,10 @@ from openpyxl import Workbook
 from accounting.choices import RepaymentChargeType
 from accounting.models import Allocation
 
-from base.date_conventions import DayCount_30_360E
 from base.utils.date import parse_date
 
 from loan.choices import LoanRepaymentStatus
-from loan.models import LoanRepayment, ApprovedLoan
+from loan.models import LoanRepayment
 
 from nach.models import NachMandate
 
