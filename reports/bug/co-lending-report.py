@@ -93,8 +93,8 @@ def main(temp_dir, **kwargs):
                 loan[1].strftime("%d-%m-%Y"),  # Application Created At
                 loan[2],  # Loan Acc No
                 loan[3],  # Partner Loan Id
-                co_lending_details.get('sa'),  # Sanctioned Loan Amount                                          |
-                co_lending_details.get('dis_a'),  # Disb Amount                                                  |
+                co_lending_details.get('sa'),  # Sanctioned Loan Amount
+                co_lending_details.get('dis_a'),  # Disb Amount                                                  
                 loan[6],  # Disbursement Date
                 loan[9].get('vehicle_details',
                             {}).get('dealer_state', ''),  # Dealer State
@@ -119,7 +119,7 @@ def main(temp_dir, **kwargs):
                 post_disbursal.get('rc_number'),  # RC Number
                 loan[9].get('vehicle_details', {}).get('chassis_number', ''),  # Chassis No
                 loan[9].get('vehicle_details', {}).get('vehicle_battery_type', ''),  # Battery Type
-                post_disbursal.get(road_price),  # On Road Price                                                       |
+                post_disbursal.get(road_price),  # On Road Price                                                       
                 loan[9].get('vehicle_details', {}).get('vehicle_insurance_provider', ''),  # Insurance Provider
                 loan[9].get('vehicle_details',
                             {}).get('vehicle_insurance_policy_number', ''),  # Policy Number
